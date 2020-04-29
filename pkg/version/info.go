@@ -75,6 +75,9 @@ func GetVersion() string {
 // GetSemverVersion returns a semver.Version struct representing the current version
 func GetSemverVersion() (semver.Version, error) {
 	text := strings.TrimPrefix(GetVersion(), VersionPrefix)
+	// if strings.Contains(text, "dev") {
+	//
+	// }
 	v, err := semver.Make(text)
 	if err != nil {
 		return v, errors.Wrapf(err, "failed to parse version %s", text)

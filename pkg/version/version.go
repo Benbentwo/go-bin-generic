@@ -27,7 +27,7 @@ func NewCmdVersion(commonOpts *common.CommonOptions) *cobra.Command {
 			options.Cmd = cmd
 			options.Args = args
 			err := options.Run()
-			util.Check(err)
+			common.CheckErr(err)
 		},
 	}
 	return cmd
@@ -36,7 +36,7 @@ func NewCmdVersion(commonOpts *common.CommonOptions) *cobra.Command {
 func (o *VersionOptions) Run() error {
 	currentVersion, err := GetSemverVersion()
 	if err != nil {
-		return errors.Wrapf(err, "getting semver version: %s", err)
+		return errors.Wrapf(err, "getting semver version: %s\n%s", err, util.ColorWarning("is this a dev build?"))
 	}
 
 	util.Logger().Infof("Version: %s", util.ColorInfo(currentVersion))
