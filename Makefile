@@ -100,7 +100,7 @@ win: ## Build for Windows
 	chmod +x build/$(NAME)-windows-amd64.exe
 
 win32:
-	CGO_ENABLED=$(CGO_ENABLED) GOOS=windows GOARCH=386 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o build/$(NAME)-win-386.exe $(MAIN_SRC_FILE)
+	CGO_ENABLED=$(CGO_ENABLED) GOOS=windows GOARCH=386 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o build/$(NAME)-windows-386.exe $(MAIN_SRC_FILE)
 	chmod +x build/$(NAME)-windows-386.exe
 
 darwin: ## Build for OSX
