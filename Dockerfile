@@ -28,7 +28,7 @@ RUN ls /app
 FROM centos:7
 
 LABEL author="Benjamin Smith"
-COPY --from=builder ./app/build/${binary_name} /usr/bin/${binary_name}
-RUN ["chmod", "-R", "+x", "/usr/bin/${binary_name}"]
+COPY --from=builder ./app/build/main /usr/bin/main
+RUN ["chmod", "-R", "+x", "/usr/bin/main"]
 
 ENTRYPOINT ["tail", "-f", "/dev/null"]
