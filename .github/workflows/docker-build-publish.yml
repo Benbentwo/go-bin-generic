@@ -1,0 +1,64 @@
+name: Master Build
+on:
+  push:
+    branches:
+      - 'master'      # Push events to branches matching refs/heads/master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Go environment
+        uses: actions/setup-go@v2.0.3
+
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      # https://github.com/Benbentwo/increment-semver
+      - name: Increment Step Patch
+        id: increment-semver-patch
+        uses: Benbentwo/increment-semver@master
+        with:
+          version-level: '-p'
+      - name: Make local Binaries
+        run: |
+          make all
+      #       Tag = <BranchName (Tag Safe)>-<Short Commit Hash>
+      - run: |
+          tag=${{ steps.increment-semver-patch.outputs.version }}
+          repository=$(echo ${{github.repository}} | tr '[:upper:]' '[:lower:]')
+          github_image=${repository}/master
+          docker build -t docker.pkg.github.com/${github_image} .
+          echo "##[set-output name=version;]$(echo ${tag})"
+          echo "##[set-output name=github_image;]$(echo ${github_image})"
+
+        id: docker_build
+
+      - name: Publish to Github Packages
+        uses: elgohr/Publish-Docker-Github-Action@master
+        with:
+          name: ${{ steps.docker_build.outputs.github_image }}
+          username: ${{ secrets.GH_PKG_USER}}
+          password: ${{ secrets.GH_PKG_API }}
+          tags: "latest,${{steps.docker_build.outputs.version}}"
+          registry: docker.pkg.github.com
+
+      # https://github.com/marketplace/actions/create-a-release
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{steps.increment-semver-patch.outputs.version}}
+          release_name: ${{steps.increment-semver-patch.outputs.version}}
+          draft: false
+          prerelease: false
+
+# https://github.com/svenstaro/upload-release-action
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v1-release
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/*
+          tag: ${{steps.increment-semver-patch.outputs.version}}
+          file_glob: true
