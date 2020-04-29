@@ -21,6 +21,7 @@ jobs:
           version-level: '-p'
       - name: Make local Binaries
         run: |
+          export VERSION=${{steps.docker_build.outputs.version}}
           make all
       #       Tag = <BranchName (Tag Safe)>-<Short Commit Hash>
       - run: |
