@@ -28,22 +28,10 @@ jobs:
 #          Limits Length to 120
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/} | sed 's@/@-@g' | sed 's/%2F/-/g' | cut -c1-119)"
 
-#       Tag = <BranchName (Tag Safe)>-<Short Commit Hash>
-      - run: |
-          short_ref=$(git rev-parse --short ${{github.sha}})
-          tag=${{ steps.extract_branch.outputs.branch }}-${short_ref}
-          repository=$(echo ${{github.repository}} | tr '[:upper:]' '[:lower:]')
-          github_image=${repository}/${{ steps.extract_branch.outputs.branch }}
-          docker build -t docker.pkg.github.com/${github_image} .
-          echo "##[set-output name=github_image;]$(echo ${github_image})"
-          echo "##[set-output name=short_ref;]$(echo ${short_ref})"
-        id: docker_build
-
-      - name: Publish to Github Packages
-        uses: elgohr/Publish-Docker-Github-Action@master
-        with:
-          name: ${{ steps.docker_build.outputs.github_image }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          tags: "latest,${{steps.docker_build.outputs.short_ref}}"
-          registry: docker.pkg.github.com
+#      - uses: actions/download-artifact@v2
+#        with:
+#          path: build-artifacts/
+#
+#      - run: |
+#          ls -al build-artifacts/
+#          ls -al build-artifacts/artifact

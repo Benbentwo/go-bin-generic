@@ -39,10 +39,10 @@ VERSION ?= $(shell echo "$$(git describe --abbrev=0 --tags 2>/dev/null)-dev+$(RE
 
 BUILDFLAGS :=  -ldflags \
   " -X $(ROOT_PACKAGE)/pkg/version.Version=$(VERSION)\
-		-X $(ROOT_PACKAGE)/pkg/cmd.BINARY='$(NAME)'\
-		-X $(ROOT_PACKAGE)/pkg/version.Org='$(ORG)'\
-		-X $(ROOT_PACKAGE)/pkg/version.Repo='$(NAME)'\
-		-X $(ROOT_PACKAGE)/pkg/version.GitServer='$(GIT_SERVER)'\
+		-X $(ROOT_PACKAGE)/pkg/cmd.BINARY=$(NAME)\
+		-X $(ROOT_PACKAGE)/pkg/version.Org=$(ORG)\
+		-X $(ROOT_PACKAGE)/pkg/version.Repo=$(NAME)\
+		-X $(ROOT_PACKAGE)/pkg/version.GitServer=$(GIT_SERVER)\
 		-X $(ROOT_PACKAGE)/pkg/version.Revision='$(REV)'\
 		-X $(ROOT_PACKAGE)/pkg/version.Branch='$(BRANCH)'\
 		-X $(ROOT_PACKAGE)/pkg/version.BuildDate='$(BUILD_DATE)'\
@@ -104,8 +104,8 @@ win32:
 	chmod +x build/$(NAME)-windows-386.exe
 
 darwin: ## Build for OSX
-	CGO_ENABLED=$(CGO_ENABLED) GOOS=darwin GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o build/$(NAME)-macOS $(MAIN_SRC_FILE)
-	chmod +x build/$(NAME)-macOS
+	CGO_ENABLED=$(CGO_ENABLED) GOOS=darwin GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o build/$(NAME)-darwin-amd64 $(MAIN_SRC_FILE)
+	chmod +x build/$(NAME)-darwin-amd64
 
 .PHONY: clean
 clean: ## Clean the generated artifacts
