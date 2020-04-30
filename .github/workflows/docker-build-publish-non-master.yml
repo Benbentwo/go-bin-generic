@@ -9,7 +9,8 @@ jobs:
     steps:
       - name: Setup Go environment
         uses: actions/setup-go@v2.0.3
-
+        with:
+          go-version: 1.12.4
       - name: Checkout
         uses: actions/checkout@v1
       - name: Create Binaries
