@@ -2,7 +2,11 @@ name: Master Build
 on:
   push:
     branches:
-      - 'master'      # Push events to branches matching refs/heads/master
+      - master
+  pull_request:
+    branches:
+      - master
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,12 +17,42 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
 
+      - name: Pull request merged
+        id: get-release-type
+        run: |
+          if [[ "${{github.action}}" == "closed" ]] || [[ "${{github.pull_request.merged}}" == "true" ]]; then
+            echo "##[set-output name=merged;]true"
+            if [[ ${{github.event.label.name}} =~ [rR]elease\ ([A-Za-z0-9_]+) ]] ; then
+              release_type=${BASH_REMATCH[1]}
+              if echo $release_type | grep iqF patch; then
+                echo "##[set-output name=release-type;]patch"
+                echo "##[set-output name=release-command;]-p"
+              elif echo $release_type | grep iqF minor;
+                echo "##[set-output name=release-type;]minor"
+                echo "##[set-output name=release-command;]-m"
+              elif echo $release_type | grep iqF major;
+                echo "##[set-output name=release-type;]major"
+                echo "##[set-output name=release-command;]-M"
+              else
+                echo "Not sure what release this is, defaulting to patch"
+                echo "##[set-output name=release-type;]patch"
+                echo "##[set-output name=release-command;]-p"
+
+              fi
+            fi
+          else
+            echo "Was not started by pull request, setting to patch"
+            echo "##[set-output name=release-type;]patch"
+            echo "##[set-output name=release-command;]-p"
+          fi
+
       # https://github.com/Benbentwo/increment-semver
       - name: Increment Step Patch
         id: increment-semver-patch
         uses: Benbentwo/increment-semver@master
         with:
-          version-level: '-p'
+          version-level: "${{steps.get-release-type.outputs.release-command}}"
+
       - name: Make local Binaries
         run: |
           export VERSION=${{steps.docker_build.outputs.version}}
