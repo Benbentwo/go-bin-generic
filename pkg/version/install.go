@@ -23,7 +23,7 @@ const ( // iota is reset to 0
 	WIN_i386    = iota
 )
 
-// GetLatestJXVersion returns latest jx version
+// GetLatestVersion returns latest version
 func (o *VersionOptions) GetLatestVersion() (semver.Version, string, error) {
 
 	// if runtime.GOOS == "darwin" {
@@ -33,7 +33,7 @@ func (o *VersionOptions) GetLatestVersion() (semver.Version, string, error) {
 	return github_helpers.GetLatestVersionFromGitHub(Org, Repo)
 }
 
-// InstallJx installs repo's cli
+// InstallBin installs repo's cli
 func (o *VersionOptions) InstallBin(upgrade bool, prefix string, version string) error {
 	util.Logger().Debugf("installing "+Repo+" %s", version)
 	if runtime.GOOS == "darwin" {
@@ -64,15 +64,24 @@ func (o *VersionOptions) InstallBin(upgrade bool, prefix string, version string)
 		version = fmt.Sprintf("%s", latestVersion)
 		prefix = fmt.Sprintf("%s", latestPrefix)
 	}
+
+	// NOTE the below is pretty similar to Jenkins-x Version, the primary difference is that This repository is uploading
+	// Basic binaries and exectuables, not tar.gz versions. so extension needs to include .exe or be nothing
 	extension := ""
 	if runtime.GOOS == "windows" {
-		extension = "exe"
+		extension = ".exe"
+	}
+
+	protocol := "https://"
+	if strings.HasPrefix(GitServer, "http") {
+		// Project configured to manually set protocol.
+		protocol = ""
 	}
 
 	BinaryDownloadBaseURL := strings.Join([]string{GitServer, Org, Repo, "releases", "download", prefix}, "/")
 	// BinaryDownloadBaseURL := "https://github.com/Benbentwo/go-bin-generic/releases/download/v1.0.0/
 	// 							 https://github.com/Benbentwo/go-bin-generic/releases/download/v1.0.0/go-bin-generic-windows-amd64.zip"
-	clientURL := fmt.Sprintf("%s%s/"+binary+"-%s-%s.%s", BinaryDownloadBaseURL, version, runtime.GOOS, runtime.GOARCH, extension)
+	clientURL := fmt.Sprintf("%s%s%s/"+binary+"-%s-%s%s", protocol, BinaryDownloadBaseURL, version, runtime.GOOS, runtime.GOARCH, extension)
 	fullPath := filepath.Join(binDir, fileName)
 	if runtime.GOOS == "windows" {
 		fullPath += ".exe"
@@ -105,11 +114,10 @@ func (o *VersionOptions) InstallBin(upgrade bool, prefix string, version string)
 			return err
 		}
 	}
-	util.Logger().Infof("Jenkins X client has been installed into %s", util.ColorInfo(fullPath))
+	util.Logger().Infof(util.ColorDebug(Repo)+" cli has been installed into %s", util.ColorInfo(fullPath))
 	return os.Chmod(fullPath, 0755)
 }
 
-// JXBinLocation finds the JX config directory and creates a bin directory inside it if it does not already exist. Returns the JX bin path
 func BinLocation() (string, error) {
 	h := util.HomeDir()
 	path := filepath.Join(h, "bin")
@@ -237,8 +245,10 @@ func DownloadFileFromUrl(filepath string, url string) (err error) {
 	return nil
 }
 
-// GetClientWithTimeout returns a client with JX default transport and user specified timeout
+// GetClientWithTimeout returns a client with default transport and user specified timeout
 func GetClientWithTimeout(duration time.Duration) *http.Client {
-	client := http.Client{}
+	client := http.Client{
+		Timeout: duration,
+	}
 	return &client
 }

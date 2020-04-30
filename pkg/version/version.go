@@ -47,7 +47,7 @@ func (o *VersionOptions) Run() error {
 func (o *VersionOptions) upgradeIfNeeded(currentVersion semver.Version) error {
 	newVersion, _, err := o.GetLatestVersion()
 	if err != nil {
-		return errors.Wrap(err, "getting latest jx version")
+		return errors.Wrap(err, "getting latest version")
 	}
 	if currentVersion.LT(newVersion) {
 		message := fmt.Sprintf("Would you like to upgrade to the %s version?", util.ColorInfo(newVersion))
