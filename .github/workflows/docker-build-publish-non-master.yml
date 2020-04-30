@@ -30,11 +30,11 @@ jobs:
 
       - uses: actions/download-artifact@v1
         with:
-          name: builds
+          name: build
 
       - name: Comment PR
         uses: machine-learning-apps/pr-comment@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          path: builds/*
+          path: build/*
