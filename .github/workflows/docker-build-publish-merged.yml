@@ -24,7 +24,6 @@ jobs:
         if: github.event.pull_request.merged
         id: get-release-type
         run: |
-#          https://api.github.com/repos/Benbentwo/go-bin-generic/commits/19be244d/pulls
           curl -H 'Accept:application/vnd.github.groot-preview+json' -u ${{github.actor}}:${{github.
           if [[ "${{github.action}}" == "closed" ]] || [[ "${{github.pull_request.merged}}" == "true" ]]; then
             echo "##[set-output name=merged;]true"
