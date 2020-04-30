@@ -34,10 +34,11 @@ jobs:
 
       - run: |
           ls -al build-artifacts/
+          ls -al build-artifacts/artifact
 
       - name: Comment PR
         uses: machine-learning-apps/pr-comment@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          path: build-artifacts/*
+          path: build-artifacts/artifact/*
