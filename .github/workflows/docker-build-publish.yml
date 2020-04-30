@@ -27,7 +27,8 @@ jobs:
       - run: |
           tag=${{ steps.increment-semver-patch.outputs.version }}
           repository=$(echo ${{github.repository}} | tr '[:upper:]' '[:lower:]')
-          github_image=${repository}/master
+          repo=$(echo ${{github.repository}} | awk -F '/' '{ print $2 }' | tr '[:upper:]' '[:lower:]')
+          github_image=${repository}/${repo}
           docker build -t docker.pkg.github.com/${github_image} .
           echo "##[set-output name=version;]$(echo ${tag})"
           echo "##[set-output name=github_image;]$(echo ${github_image})"
