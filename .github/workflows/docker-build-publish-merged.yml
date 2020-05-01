@@ -10,8 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged
     steps:
+      - name: Dump GitHub context
+          env:
+            GITHUB_PULL_REQUEST: ${{ toJson(github.event.pull_request) }}
+          run: echo "$GITHUB_CONTEXT"
+
       - run: |
-          printf """${{github.event.pull_request}}""" > pr.json
+          echo $GITHUB > pr0.json
+          printf """${{toJson(github.event.pull_request)}}""" > pr1.json
       - name: Artifact Binaries
         uses: actions/upload-artifact@v2
         with:
