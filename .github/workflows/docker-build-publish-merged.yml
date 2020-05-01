@@ -24,8 +24,12 @@ jobs:
         if: github.event.pull_request.merged
         id: get-release-type
         run: |
-          printf ${{event}}
-          if [[ "${{event.action}}" == "closed" ]] || [[ "${{github.pull_request.merged}}" == "true" ]]; then
+          printf ${{github.event}}
+          printf ${{github.event.pull_request}}
+          printf ${{github.pull_request}}
+          printf ${{github.event.pull_request.state}}
+          printf ${{github.pull_request.state}}
+          if [[ "${{github.event.pull_request.state}}" == "closed" ]] || [[ "${{github.pull_request.merged}}" == "true" ]]; then
             echo "##[set-output name=merged;]true"
             if [[ ${{github.event.label.name}} =~ [rR]elease\ ([A-Za-z0-9_]+) ]] ; then
               release_type=${BASH_REMATCH[1]}
