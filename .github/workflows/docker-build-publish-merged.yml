@@ -27,7 +27,7 @@ jobs:
           if [[ "${{github.event.pull_request.state}}" == "closed" ]] || [[ "${{github.event.pull_request.merged}}" == "true" ]]; then
             echo "##[set-output name=merged;]true"
             printf """${{github.event.pull_request}}""" > pr.json
-            names=$(| jq -r '.labels[] | .name' pr.json)
+            names=$(jq -r '.labels[] | .name' pr.json)
             for name in $names; do
               if [[ ${name} =~ [rR]elease\ ([A-Za-z0-9_]+) ]] ; then
                 release_type=${BASH_REMATCH[1]}
