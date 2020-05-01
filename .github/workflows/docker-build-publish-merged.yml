@@ -10,6 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged
     steps:
+      - run: |
+          printf """${{github.event.pull_request}}""" > pr.json
+      - name: Artifact Binaries
+        uses: actions/upload-artifact@v2
+        with:
+          path: pr.json
       - name: Setup Go environment
         if: github.event.pull_request.merged
         uses: actions/setup-go@v2.0.3
@@ -19,6 +25,7 @@ jobs:
       - name: Checkout
         if: github.event.pull_request.merged
         uses: actions/checkout@v1
+
 
       - name: Pull request merged
         if: github.event.pull_request.merged
