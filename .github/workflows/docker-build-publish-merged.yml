@@ -24,31 +24,28 @@ jobs:
         if: github.event.pull_request.merged
         id: get-release-type
         run: |
-          printf ${{github.event}}
-          printf ${{github.event.pull_request}}
-          printf ${{github.pull_request}}
-          printf ${{github.event.pull_request.state}}
-          printf ${{github.pull_request.state}}
-          if [[ "${{github.event.pull_request.state}}" == "closed" ]] || [[ "${{github.pull_request.merged}}" == "true" ]]; then
+          if [[ "${{github.event.pull_request.state}}" == "closed" ]] || [[ "${{github.event.pull_request.merged}}" == "true" ]]; then
             echo "##[set-output name=merged;]true"
-            if [[ ${{github.event.label.name}} =~ [rR]elease\ ([A-Za-z0-9_]+) ]] ; then
-              release_type=${BASH_REMATCH[1]}
-              if echo $release_type | grep iqF patch; then
-                echo "##[set-output name=release-type;]patch"
-                echo "##[set-output name=release-command;]-p"
-              elif echo $release_type | grep iqF minor;
-                echo "##[set-output name=release-type;]minor"
-                echo "##[set-output name=release-command;]-m"
-              elif echo $release_type | grep iqF major;
-                echo "##[set-output name=release-type;]major"
-                echo "##[set-output name=release-command;]-M"
-              else
-                echo "Not sure what release this is, defaulting to patch"
-                echo "##[set-output name=release-type;]patch"
-                echo "##[set-output name=release-command;]-p"
-
+            names=$(echo ${{github.event.pull_request}} | jq -r '.labels[] | .name' )
+            for name in $names; do
+              if [[ ${name} =~ [rR]elease\ ([A-Za-z0-9_]+) ]] ; then
+                release_type=${BASH_REMATCH[1]}
+                if echo $release_type | grep iqF patch; then
+                  echo "##[set-output name=release-type;]patch"
+                  echo "##[set-output name=release-command;]-p"
+                elif echo $release_type | grep iqF minor;
+                  echo "##[set-output name=release-type;]minor"
+                  echo "##[set-output name=release-command;]-m"
+                elif echo $release_type | grep iqF major;
+                  echo "##[set-output name=release-type;]major"
+                  echo "##[set-output name=release-command;]-M"
+                else
+                  echo "Not sure what release this is, defaulting to patch"
+                  echo "##[set-output name=release-type;]patch"
+                  echo "##[set-output name=release-command;]-p"
+                fi
               fi
-            fi
+            done
           else
             echo "Was not started by pull request, setting to patch"
             echo "##[set-output name=release-type;]patch"
