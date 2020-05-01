@@ -36,15 +36,20 @@ jobs:
             echo '${{toJson(github.event.pull_request)}}' > data.json
             names=$(jq -r '.labels[] | .name' data.json)
             for name in $names; do
+              echo "Looking at label: \"${name}\""
               if [[ ${name} =~ [rR]elease\ ([A-Za-z0-9_]+) ]] ; then
                 release_type=${BASH_REMATCH[1]}
+                echo "ReleaseType set to: \"${release_type}\""
                 if echo $release_type | grep iqF patch; then
+                  echo "Setting to Patch"
                   echo "##[set-output name=release-type;]patch"
                   echo "##[set-output name=release-command;]-p"
                 elif echo $release_type | grep iqF minor; then
+                  echo "Setting to Minor"
                   echo "##[set-output name=release-type;]minor"
                   echo "##[set-output name=release-command;]-m"
                 elif echo $release_type | grep iqF major; then
+                  echo "Setting to Major"
                   echo "##[set-output name=release-type;]major"
                   echo "##[set-output name=release-command;]-M"
                 else
@@ -60,6 +65,10 @@ jobs:
             echo "##[set-output name=release-command;]-p"
           fi
 
+      - name: Debug Above Step
+        run: |
+          echo "${{steps.get-release-type.outputs.release-command}}"
+          echo "${{steps.get-release-type.outputs.release-type}}"
       # https://github.com/Benbentwo/increment-semver
       - name: Increment Step Patch
         if: github.event.pull_request.merged
