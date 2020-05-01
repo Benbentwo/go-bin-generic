@@ -40,15 +40,15 @@ jobs:
               if [[ ${name} =~ [rR]elease\ ([A-Za-z0-9_]+) ]] ; then
                 release_type=${BASH_REMATCH[1]}
                 echo "ReleaseType set to: \"${release_type}\""
-                if echo $release_type | grep iqF patch; then
+                if echo $release_type | grep -iqF patch; then
                   echo "Setting to Patch"
                   echo "##[set-output name=release-type;]patch"
                   echo "##[set-output name=release-command;]-p"
-                elif echo $release_type | grep iqF minor; then
+                elif echo $release_type | grep -iqF minor; then
                   echo "Setting to Minor"
                   echo "##[set-output name=release-type;]minor"
                   echo "##[set-output name=release-command;]-m"
-                elif echo $release_type | grep iqF major; then
+                elif echo $release_type | grep -iqF major; then
                   echo "Setting to Major"
                   echo "##[set-output name=release-type;]major"
                   echo "##[set-output name=release-command;]-M"
