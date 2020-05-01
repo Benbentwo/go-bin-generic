@@ -21,7 +21,7 @@ jobs:
       - name: Artifact Binaries
         uses: actions/upload-artifact@v2
         with:
-          path: pr.json
+          path: "*.json"
       - name: Setup Go environment
         if: github.event.pull_request.merged
         uses: actions/setup-go@v2.0.3
