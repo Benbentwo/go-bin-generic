@@ -34,8 +34,8 @@ jobs:
           if [[ "${{github.event.pull_request.state}}" == "closed" ]] || [[ "${{github.event.pull_request.merged}}" == "true" ]]; then
             echo "##[set-output name=merged;]true"
             echo '${{toJson(github.event.pull_request)}}' > data.json
-            names=$(jq -r '.labels[] | .name' data.json)
-            for name in $names; do
+            jq -r '.labels[] | .name' data.json > labels.txt
+            while IFS= read -r name; do
               echo "Looking at label: \"${name}\""
               if [[ ${name} =~ [rR]elease\ ([A-Za-z0-9_]+) ]] ; then
                 release_type=${BASH_REMATCH[1]}
@@ -58,7 +58,7 @@ jobs:
                   echo "##[set-output name=release-command;]-p"
                 fi
               fi
-            done
+            done < labels.txt
           else
             echo "Was not started by pull request, setting to patch"
             echo "##[set-output name=release-type;]patch"
