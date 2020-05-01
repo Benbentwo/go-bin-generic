@@ -26,17 +26,18 @@ jobs:
         run: |
           if [[ "${{github.event.pull_request.state}}" == "closed" ]] || [[ "${{github.event.pull_request.merged}}" == "true" ]]; then
             echo "##[set-output name=merged;]true"
-            names=$(echo ${{github.event.pull_request}} | jq -r '.labels[] | .name' )
+            printf """${{github.event.pull_request}}""" > pr.json
+            names=$(| jq -r '.labels[] | .name' pr.json)
             for name in $names; do
               if [[ ${name} =~ [rR]elease\ ([A-Za-z0-9_]+) ]] ; then
                 release_type=${BASH_REMATCH[1]}
                 if echo $release_type | grep iqF patch; then
                   echo "##[set-output name=release-type;]patch"
                   echo "##[set-output name=release-command;]-p"
-                elif echo $release_type | grep iqF minor;
+                elif echo $release_type | grep iqF minor; then
                   echo "##[set-output name=release-type;]minor"
                   echo "##[set-output name=release-command;]-m"
-                elif echo $release_type | grep iqF major;
+                elif echo $release_type | grep iqF major; then
                   echo "##[set-output name=release-type;]major"
                   echo "##[set-output name=release-command;]-M"
                 else
