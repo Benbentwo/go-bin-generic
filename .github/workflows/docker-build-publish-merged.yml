@@ -11,9 +11,9 @@ jobs:
     if: github.event.pull_request.merged
     steps:
       - name: Dump GitHub context
-          env:
-            GITHUB_PULL_REQUEST: ${{ toJson(github.event.pull_request) }}
-          run: echo "$GITHUB_CONTEXT"
+        env:
+          GITHUB_PULL_REQUEST: ${{ toJson(github.event.pull_request) }}
+        run: echo "$GITHUB_CONTEXT"
 
       - run: |
           echo $GITHUB > pr0.json
