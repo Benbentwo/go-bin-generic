@@ -1,6 +1,7 @@
 GIT_SERVER 	:= github.com
 ORG			:= Benbentwo
-NAME 		:= go-bin-generic
+REPO        := go-bin-generic
+BINARY 		:= bb
 
 # Pretty Constant stuff Below, Configurable above
 
@@ -17,7 +18,7 @@ GO_VERSION := $(shell $(GO) version | sed -e 's/^[^0-9.]*\([0-9.]*\).*/\1/')
 GO_DEPENDENCIES := $(call rwildcard,pkg/,*.go) $(call rwildcard,*.go)
 
 REV := $(shell git rev-parse --short HEAD 2> /dev/null || echo 'unknown')
-ORG_REPO := $(ORG)/$(NAME)
+ORG_REPO := $(ORG)/$(REPO)
 ROOT_PACKAGE := $(GIT_SERVER)/$(ORG_REPO)
 
 BRANCH     := $(shell git rev-parse --abbrev-ref HEAD 2> /dev/null  || echo 'unknown')
@@ -39,9 +40,10 @@ VERSION ?= $(shell echo "$$(git describe --abbrev=0 --tags 2>/dev/null)-dev+$(RE
 
 BUILDFLAGS :=  -ldflags \
   " -X $(ROOT_PACKAGE)/pkg/version.Version=$(VERSION)\
-		-X $(ROOT_PACKAGE)/pkg/cmd.BINARY=$(NAME)\
+		-X $(ROOT_PACKAGE)/pkg/cmd.BINARY=$(BINARY)\
 		-X $(ROOT_PACKAGE)/pkg/version.Org=$(ORG)\
-		-X $(ROOT_PACKAGE)/pkg/version.Repo=$(NAME)\
+		-X $(ROOT_PACKAGE)/pkg/version.Repo=$(REPO)\
+		-X $(ROOT_PACKAGE)/pkg/version.Binary=$(BINARY)\
 		-X $(ROOT_PACKAGE)/pkg/version.GitServer=$(GIT_SERVER)\
 		-X $(ROOT_PACKAGE)/pkg/version.Revision='$(REV)'\
 		-X $(ROOT_PACKAGE)/pkg/version.Branch='$(BRANCH)'\
@@ -77,7 +79,7 @@ print-version: ## Print version
 	@echo $(VERSION)
 
 build: $(GO_DEPENDENCIES) ## Build binary for current OS
-	CGO_ENABLED=$(CGO_ENABLED) $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o build/$(NAME) $(MAIN_SRC_FILE)
+	CGO_ENABLED=$(CGO_ENABLED) $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o build/$(BINARY) $(MAIN_SRC_FILE)
 
 tidy-deps: ## Cleans up dependencies
 	$(GO) mod tidy
@@ -88,24 +90,24 @@ install: $(GO_DEPENDENCIES) ## Install the binary
 	GOBIN=${GOPATH}/bin $(GO) install $(BUILDFLAGS) $(MAIN_SRC_FILE)
 
 linux: ## Build for Linux
-	CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o build/$(NAME)-linux-amd64 $(MAIN_SRC_FILE)
-	chmod +x build/$(NAME)-linux-amd64
+	CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o build/$(BINARY)-linux-amd64 $(MAIN_SRC_FILE)
+	chmod +x build/$(BINARY)-linux-amd64
 
 arm: ## Build for ARM
-	CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=arm $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o build/$(NAME)-linux-arm $(MAIN_SRC_FILE)
-	chmod +x build/$(NAME)-linux-arm
+	CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=arm $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o build/$(BINARY)-linux-arm $(MAIN_SRC_FILE)
+	chmod +x build/$(BINARY)-linux-arm
 
 win: ## Build for Windows
-	CGO_ENABLED=$(CGO_ENABLED) GOOS=windows GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o build/$(NAME)-windows-amd64.exe $(MAIN_SRC_FILE)
-	chmod +x build/$(NAME)-windows-amd64.exe
+	CGO_ENABLED=$(CGO_ENABLED) GOOS=windows GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o build/$(BINARY)-windows-amd64.exe $(MAIN_SRC_FILE)
+	chmod +x build/$(BINARY)-windows-amd64.exe
 
 win32:
-	CGO_ENABLED=$(CGO_ENABLED) GOOS=windows GOARCH=386 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o build/$(NAME)-windows-386.exe $(MAIN_SRC_FILE)
-	chmod +x build/$(NAME)-windows-386.exe
+	CGO_ENABLED=$(CGO_ENABLED) GOOS=windows GOARCH=386 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o build/$(BINARY)-windows-386.exe $(MAIN_SRC_FILE)
+	chmod +x build/$(BINARY)-windows-386.exe
 
 darwin: ## Build for OSX
-	CGO_ENABLED=$(CGO_ENABLED) GOOS=darwin GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o build/$(NAME)-darwin-amd64 $(MAIN_SRC_FILE)
-	chmod +x build/$(NAME)-darwin-amd64
+	CGO_ENABLED=$(CGO_ENABLED) GOOS=darwin GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o build/$(BINARY)-darwin-amd64 $(MAIN_SRC_FILE)
+	chmod +x build/$(BINARY)-darwin-amd64
 
 .PHONY: clean
 clean: ## Clean the generated artifacts
