@@ -34,6 +34,7 @@ var (
 	GitServer string
 	Repo      string
 	Org       string
+	Binary    string
 )
 
 // Map provides the iterable version information.
