@@ -1,7 +1,7 @@
 GIT_SERVER 	:= github.com
 ORG			:= Benbentwo
 REPO        := go-bin-generic
-BINARY 		:= bb
+BINARY 		:= go-bin-generic
 
 # Pretty Constant stuff Below, Configurable above
 
