@@ -14,6 +14,7 @@ Requires Go...
     - `Release Patch`
     - `Release Minor`
     - `Release Major`
+    
    merge the Pr in and github actions (assuming enabled) should build a new binary with the right version, publish it to a new release.
    
 ### Features:
