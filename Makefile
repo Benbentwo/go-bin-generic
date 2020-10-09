@@ -62,7 +62,9 @@ else
 GOTEST += -p 4
 endif
 
-
+TEST_PACKAGE ?= ./...
+COVER_OUT:=$(REPORTS_DIR)/cover.out
+COVERFLAGS=-coverprofile=$(COVER_OUT) --covermode=count --coverpkg=./...
 
 .PHONY: list
 list: ## List all make targets
@@ -74,6 +76,11 @@ help:
 	@grep -h -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 all: build ## Build the binary
+full: check ## Build and run the tests
+check: build test ## Build and run the tests
+get-test-deps: ## Install test dependencies
+	$(GO_NOMOD) get github.com/axw/gocov/gocov
+	$(GO_NOMOD) get -u gopkg.in/matm/v1/gocov-html
 
 print-version: ## Print version
 	@echo $(VERSION)
@@ -85,6 +92,26 @@ tidy-deps: ## Cleans up dependencies
 	$(GO) mod tidy
 	# mod tidy only takes compile dependencies into account, let's make sure we capture tooling dependencies as well
 	@$(MAKE) install-generate-deps
+
+.PHONY: make-reports-dir
+make-reports-dir:
+	mkdir -p $(REPORTS_DIR)
+
+test: ## Run tests with the "unit" build tag
+	KUBECONFIG=/cluster/connections/not/allowed CGO_ENABLED=$(CGO_ENABLED) $(GOTEST) --tags=unit -failfast -short ./... $(TEST_BUILDFLAGS)
+
+test-coverage : make-reports-dir ## Run tests and coverage for all tests with the "unit" build tag
+	CGO_ENABLED=$(CGO_ENABLED) $(GOTEST) --tags=unit $(COVERFLAGS) -failfast -short ./... $(TEST_BUILDFLAGS)
+
+test-report: make-reports-dir get-test-deps test-coverage ## Create the test report
+	@gocov convert $(COVER_OUT) | gocov report | tee $(REPORTS_DIR)/report.txt
+
+test-report-html: make-reports-dir get-test-deps test-coverage ## Create the test report in HTML format
+	@gocov convert $(COVER_OUT) | gocov-html > $(REPORTS_DIR)/cover.html && open $(REPORTS_DIR)/cover.html
+
+test-verbose: make-reports-dir ## Run the unit tests in verbose mode
+	CGO_ENABLED=$(CGO_ENABLED) $(GOTEST) -v $(COVERFLAGS) --tags=unit -failfast ./... $(TEST_BUILDFLAGS)
+
 
 install: $(GO_DEPENDENCIES) ## Install the binary
 	GOBIN=${GOPATH}/bin $(GO) install $(BUILDFLAGS) $(MAIN_SRC_FILE)

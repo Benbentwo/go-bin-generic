@@ -2,8 +2,7 @@ package common
 
 import (
 	"fmt"
-	"github.com/Benbentwo/utils/log"
-	"github.com/Benbentwo/utils/util"
+	"github.com/Benbentwo/go-bin-generic/pkg/common/log"
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
 	"gopkg.in/AlecAivazis/survey.v1/terminal"
@@ -18,6 +17,8 @@ import (
 const (
 	OptionBatchMode = "batch-mode"
 	OptionVerbose   = "verbose"
+	OptionQuiet     = "quiet" // sets to 	warn 	level
+
 )
 
 type CommonOptions struct {
@@ -25,6 +26,7 @@ type CommonOptions struct {
 	Args      []string
 	BatchMode bool
 	Verbose   bool
+	Quiet     bool
 	In        terminal.FileReader
 	Out       terminal.FileWriter
 	Err       io.Writer
@@ -38,25 +40,33 @@ func (o *CommonOptions) AddBaseFlags(cmd *cobra.Command) {
 	}
 	cmd.PersistentFlags().BoolVarP(&o.BatchMode, OptionBatchMode, "b", defaultBatchMode, "Runs in batch mode without prompting for user input")
 	cmd.PersistentFlags().BoolVarP(&o.Verbose, OptionVerbose, "", false, "Enables verbose output")
+	cmd.PersistentFlags().BoolVarP(&o.Quiet, OptionQuiet, "q", false, "Enables quiet output")
 
 	o.Cmd = cmd
 }
 
 func SetLoggingLevel(cmd *cobra.Command, args []string) {
-	verbose, err := strconv.ParseBool(cmd.Flag(OptionVerbose).Value.String())
-	if err != nil {
-		util.Logger().Errorf("Unable to determine log level")
-	}
-
-	if verbose {
-		err := log.SetLevel("debug")
-		if err != nil {
-			util.Logger().Errorf("Unable to set log level to debug")
+	verbose, _ := strconv.ParseBool(cmd.Flag(OptionVerbose).Value.String())
+	quiet, _ := strconv.ParseBool(cmd.Flag(OptionQuiet).Value.String())
+	level := os.Getenv("VGS_LOG_LEVEL")
+	if level != "" {
+		if verbose {
+			log.Logger().Trace("The VGS_LOG_LEVEL environment variable took precedence over the verbose flag")
 		}
-	} else {
-		err := log.SetLevel("info")
+
+		err := log.SetLevel(level)
 		if err != nil {
-			util.Logger().Errorf("Unable to set log level to info")
+			log.Logger().Errorf("Unable to set log level to %s", level)
+			level = ""
+		}
+	}
+	if level == "" {
+		if verbose {
+			_ = log.SetLevel("debug")
+		} else if quiet {
+			_ = log.SetLevel("warn")
+		} else {
+			_ = log.SetLevel("info")
 		}
 	}
 }
@@ -65,6 +75,7 @@ const (
 	defaultErrorExitCode = 1
 )
 
+var osExit = os.Exit
 var fatalErrHandler = Fatal
 
 // BehaviorOnFatal allows you to override the default behavior when a fatal
@@ -89,7 +100,7 @@ func Fatal(msg string, code int) {
 		}
 		fmt.Fprint(os.Stderr, msg)
 	}
-	os.Exit(code)
+	osExit(code)
 }
 
 // This method is generic to the command in use and may be used by non-Kubectl
