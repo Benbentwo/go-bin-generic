@@ -73,9 +73,9 @@ func TestLoggerFail(t *testing.T) {
 func TestNewVgsTextFormat(t *testing.T) {
 	tests := []struct {
 		name string
-		want *VgsTextFormat
+		want *CustomTextFormat
 	}{
-		{"The Test", &VgsTextFormat{
+		{"The Test", &CustomTextFormat{
 			ShowInfoLevel:   false,
 			ShowTimestamp:   false,
 			TimestampFormat: "2006-01-02 15:04:05",
@@ -154,7 +154,7 @@ func TestVgsTextFormat_Format(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			_ = SetLevel("Info")
-			f := &VgsTextFormat{
+			f := &CustomTextFormat{
 				ShowInfoLevel:   tt.fields.ShowInfoLevel,
 				ShowTimestamp:   tt.fields.ShowTimestamp,
 				TimestampFormat: tt.fields.TimestampFormat,
@@ -164,7 +164,7 @@ func TestVgsTextFormat_Format(t *testing.T) {
 			assert.Equal(t, tt.expectedOutput, out)
 		})
 	}
-	defaultFormat := VgsTextFormat{
+	defaultFormat := CustomTextFormat{
 		ShowInfoLevel:   false,
 		ShowTimestamp:   false,
 		TimestampFormat: "",
